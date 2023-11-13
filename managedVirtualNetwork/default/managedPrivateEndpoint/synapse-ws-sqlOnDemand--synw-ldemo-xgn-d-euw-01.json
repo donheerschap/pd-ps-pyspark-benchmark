@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--synw-ldemo-xgn-d-euw-01",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"synw-ldemo-xgn-d-euw-01-ondemand.a5205570-9258-44c9-902f-91f72140910a.sql.azuresynapse.net"
+		]
+	}
+}

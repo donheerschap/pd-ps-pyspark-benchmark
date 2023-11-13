@@ -1,0 +1,10 @@
+{
+	"name": "dfs",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Storage/storageAccounts/dlldemoxgndeuw01",
+		"groupId": "dfs",
+		"fqdns": [
+			"dlldemoxgndeuw01.dfs.core.windows.net"
+		]
+	}
+}
