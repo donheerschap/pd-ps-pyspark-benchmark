@@ -1,0 +1,828 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "synw-ldemo-xgn-d-euw-01"
+		},
+		"LS_DATASTORE_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_DATASTORE'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sql-ldemo-xgn-d-euw-01.database.windows.net;Initial Catalog=datastore"
+		},
+		"synw-ldemo-xgn-d-euw-01-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synw-ldemo-xgn-d-euw-01-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-ldemo-xgn-d-euw-01.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"LS_BLOB_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://dlldemoxgndeuw01.blob.core.windows.net/"
+		},
+		"LS_DFS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlldemoxgndeuw01.dfs.core.windows.net/"
+		},
+		"synw-ldemo-xgn-d-euw-01-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlldemoxgndeuw01.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_BLOB')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"serviceEndpoint": "[parameters('LS_BLOB_properties_typeProperties_serviceEndpoint')]",
+					"accountKind": "StorageV2"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_DATASTORE')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_DATASTORE_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_DFS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_DFS_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-ldemo-xgn-d-euw-01-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synw-ldemo-xgn-d-euw-01-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-ldemo-xgn-d-euw-01-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synw-ldemo-xgn-d-euw-01-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SHIR')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Self hosted integration runtime",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MI sql conn')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "benchmark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "52f64812-8833-465c-9f87-b25823cd06a6"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01/bigDataPools/benchmark",
+						"name": "benchmark",
+						"type": "Spark",
+						"endpoint": "https://synw-ldemo-xgn-d-euw-01.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/benchmark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.3",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"    import struct\r\n",
+							"    from sqlalchemy import create_engine, event\r\n",
+							"    from sqlalchemy.engine.url import URL\r\n",
+							"    from azure import identity\r\n",
+							"    import pandas as pd"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"access_token = TokenLibrary.getConnectionString(\"LS_DATASTORE\")\r\n",
+							"print(access_token)"
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"SQL_COPT_SS_ACCESS_TOKEN = 1256  # Connection option for access tokens, as defined in msodbcsql.h\r\n",
+							"TOKEN_URL = \"https://database.windows.net/\"  # The token URL for any Azure SQL database\r\n",
+							"\r\n",
+							"connection_string = \"mssql+pyodbc://sql-ldemo-xgn-d-euw-01.database.windows.net/datastore?driver=ODBC+Driver+17+for+SQL+Server\"\r\n",
+							"engine = create_engine(connection_string)\r\n",
+							"azure_credentials = identity.DefaultAzureCredential()\r\n",
+							"\r\n",
+							"@event.listens_for(engine, \"do_connect\")\r\n",
+							"def provide_token(dialect, conn_rec, cargs, cparams):\r\n",
+							"    # remove the \"Trusted_Connection\" parameter that SQLAlchemy adds\r\n",
+							"    cargs[0] = cargs[0].replace(\";Trusted_Connection=Yes\", \"\")\r\n",
+							"    # create token credential\r\n",
+							"    raw_token = azure_credentials.get_token(TOKEN_URL).token.encode(\"utf-16-le\")\r\n",
+							"    token_struct = struct.pack(f\"<I{len(raw_token)}s\", len(raw_token), token)\r\n",
+							"    # apply it to keyword arguments\r\n",
+							"    cparams[\"attrs_before\"] = {SQL_COPT_SS_ACCESS_TOKEN: token_struct}"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"query = 'SELECT 1'\r\n",
+							"dfsql = pd.read_sql(query, engine)\r\n",
+							"print(dfsql)"
+						],
+						"outputs": [],
+						"execution_count": 4
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pandas on spark')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "benchmark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "b9f8663e-29b6-4b07-82a6-1b1e6792d1ba"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01/bigDataPools/benchmark",
+						"name": "benchmark",
+						"type": "Spark",
+						"endpoint": "https://synw-ldemo-xgn-d-euw-01.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/benchmark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.3",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"import pyspark.pandas as ps"
+						],
+						"outputs": [],
+						"execution_count": 39
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#read data file\r\n",
+							"# Note not sure yet\r\n",
+							"\r\n",
+							"# source_full_storage_account_name = \"dlldemoxgndeuw01.dfs.core.windows.net\"\r\n",
+							"# spark.conf.set(f\"spark.storage.synapse.{source_full_storage_account_name}.linkedServiceName\", \"LS_BLOB\")\r\n",
+							"# sc._jsc.hadoopConfiguration().set(f\"fs.azure.account.oauth.provider.type.{source_full_storage_account_name}\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider\")\r\n",
+							"\r\n",
+							"df = ps.read_csv(\r\n",
+							"    'abfss://raw@dlldemoxgndeuw01.dfs.core.windows.net/SHOPEE_REVIEWS.csv', \r\n",
+							"    storage_options = {'linked_service' : 'LS_DFS'}\r\n",
+							")\r\n",
+							"df.info()"
+						],
+						"outputs": [],
+						"execution_count": 42
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df.count()"
+						],
+						"outputs": [],
+						"execution_count": 47
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pandas')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "benchmark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "713b577c-2d61-47c1-8c72-d8446f35979d"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01/bigDataPools/benchmark",
+						"name": "benchmark",
+						"type": "Spark",
+						"endpoint": "https://synw-ldemo-xgn-d-euw-01.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/benchmark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.3",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"import pandas as pd\r\n",
+							"import json"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#read data file\r\n",
+							"# Note: Required MSI blob contributor\r\n",
+							"df = pd.read_csv(\r\n",
+							"    'abfss://raw/SHOPEE_REVIEWS.csv', \r\n",
+							"    storage_options = {'linked_service' : 'LS_BLOB'}\r\n",
+							")\r\n",
+							"df.info()\r\n",
+							"   "
+						],
+						"outputs": [],
+						"execution_count": 79
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df.count()"
+						],
+						"outputs": [],
+						"execution_count": 80
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df['nestedJson'] = json.dumps({'key1': 'value1', 'key2': 'value2', 'keyn': 1})\r\n",
+							"df.head(5)"
+						],
+						"outputs": [],
+						"execution_count": 81
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df = pd.concat([df, pd.json_normalize(df.nestedJson.apply(json.loads))], axis=1)"
+						],
+						"outputs": [],
+						"execution_count": 82
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df.head(5)"
+						],
+						"outputs": [],
+						"execution_count": 83
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pyspark')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "benchmark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "3c1d2eeb-98f0-415d-b43d-6cc6086dec3a"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01/bigDataPools/benchmark",
+						"name": "benchmark",
+						"type": "Spark",
+						"endpoint": "https://synw-ldemo-xgn-d-euw-01.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/benchmark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.3",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"# Set the required configs\r\n",
+							"# Note requires User Identity blob contributor\r\n",
+							"source_full_storage_account_name = \"dlldemoxgndeuw01.dfs.core.windows.net\"\r\n",
+							"spark.conf.set(f\"spark.storage.synapse.{source_full_storage_account_name}.linkedServiceName\", \"LS_BLOB\")\r\n",
+							"sc._jsc.hadoopConfiguration().set(f\"fs.azure.account.oauth.provider.type.{source_full_storage_account_name}\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider\")\r\n",
+							"\r\n",
+							"df = spark.read.csv('abfss://raw@dlldemoxgndeuw01.dfs.core.windows.net/SHOPEE_REVIEWS.csv')\r\n",
+							"\r\n",
+							"df.summary().show()"
+						],
+						"outputs": [],
+						"execution_count": 44
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df.count()"
+						],
+						"outputs": [],
+						"execution_count": 49
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/benchmark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 10,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Medium",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.3",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "westeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/blob')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Storage/storageAccounts/dlldemoxgndeuw01",
+				"groupId": "blob",
+				"fqdns": [
+					"dlldemoxgndeuw01.blob.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/dfs')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Storage/storageAccounts/dlldemoxgndeuw01",
+				"groupId": "dfs",
+				"fqdns": [
+					"dlldemoxgndeuw01.dfs.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/sql')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Sql/servers/sql-ldemo-xgn-d-euw-01",
+				"groupId": "sqlServer"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--synw-ldemo-xgn-d-euw-01')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01",
+				"groupId": "sql",
+				"fqdns": [
+					"synw-ldemo-xgn-d-euw-01.a5205570-9258-44c9-902f-91f72140910a.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--synw-ldemo-xgn-d-euw-01')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/a0a34ac7-898e-46ac-9b16-78e6808067c7/resourceGroups/rg-ldemo-xgn-d-euw-01/providers/Microsoft.Synapse/workspaces/synw-ldemo-xgn-d-euw-01",
+				"groupId": "sqlOnDemand",
+				"fqdns": [
+					"synw-ldemo-xgn-d-euw-01-ondemand.a5205570-9258-44c9-902f-91f72140910a.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		}
+	]
+}
